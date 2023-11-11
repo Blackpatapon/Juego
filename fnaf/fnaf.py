@@ -8,25 +8,65 @@ pygame.init()
 screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('FNAF 2 Mini Game')
+pygame.display.set_caption('Puppet Mini Game')
 
 black = (0, 0, 0)
 white = (255, 255, 255)
-
-# Jugador
-player_size = 50
-player_x = screen_width // 2 - player_size // 2
-player_y = screen_height // 2 - player_size // 2
-
-# Enemigo
-enemy_size = 50
-enemy_x = random.randint(0, screen_width - enemy_size)
-enemy_y = random.randint(0, screen_height - enemy_size)
+red = (255, 0, 0)
 
 # Sonidos
 pygame.mixer.init()
-footstep_sound = pygame.mixer.Sound('sound/Phantom Puppet_Sound.mp3')
+interference_sound = pygame.mixer.Sound('sound/interferencia.mp3')  # Ajusta la ruta del archivo de sonido
+
+# Reproducir sonido de interferencia
+interference_sound.play()
+
+# Mostrar estática de color rojo durante la interferencia
+for _ in range(90):  # 90 frames (3 segundos a 30 fps)
+    screen.fill(red if random.randint(0, 1) == 0 else black)
+    pygame.display.update()
+
+time.sleep(3)  # Esperar 3 segundos
+
+# Detener sonido de interferencia
+interference_sound.stop()
+
+# Puppet
+puppet_size = 100
+puppet_image_left = pygame.image.load('image/puppet_left.png')
+puppet_image_right = pygame.image.load('image/puppet_right.png') 
+puppet_image_left = pygame.transform.scale(puppet_image_left, (puppet_size, puppet_size))
+puppet_image_right = pygame.transform.scale(puppet_image_right, (puppet_size, puppet_size))
+puppet_image = puppet_image_left 
+puppet_x = screen_width // 2 - puppet_size // 2
+puppet_y = screen_height // 2 - puppet_size // 2
+
+# Niños
+niño_size = 50
+niño_images = [
+    pygame.image.load('image/niños.png'),  # Ajusta la ruta de la imagen del niño 1
+    pygame.image.load('image/niños.png'),  # Ajusta la ruta de la imagen del niño 2
+    pygame.image.load('image/niños.png'),  # Ajusta la ruta de la imagen del niño 3
+    pygame.image.load('image/niños.png')   # Ajusta la ruta de la imagen del niño 4
+]
+
+niños = []
+for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100), 
+                              (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
+    niños.append({
+        'x': position[0],
+        'y': position[1],
+        'size': niño_size,
+        'image': pygame.transform.scale(niño_images[i], (niño_size, niño_size))
+    })
+
+# Sonidos
+footstep_sound = pygame.mixer.Sound('sound/found_puppet.mp3')
 laugh_sound = pygame.mixer.Sound('sound/FNAF2_Jumpscare_Sound.mp3')
+
+# Música de fondo
+pygame.mixer.music.load('sound/found_puppet.mp3')  # Ajusta la ruta del archivo de música
+pygame.mixer.music.play(-1)  # -1 significa reproducir en bucle
 
 # Loop principal del juego
 clock = pygame.time.Clock()
@@ -38,36 +78,30 @@ while not game_over:
             game_over = True
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        player_x -= 5
-    if keys[pygame.K_RIGHT]:
-        player_x += 5
-    if keys[pygame.K_UP]:
-        player_y -= 5
-    if keys[pygame.K_DOWN]:
-        player_y += 5
+    if keys[pygame.K_LEFT] and puppet_x > 0:
+        puppet_x -= 5
+        puppet_image = puppet_image_left
+    if keys[pygame.K_RIGHT] and puppet_x < screen_width - puppet_size:
+        puppet_x += 5
+        puppet_image = puppet_image_right
+    if keys[pygame.K_UP] and puppet_y > 0:
+        puppet_y -= 5
+    if keys[pygame.K_DOWN] and puppet_y < screen_height - puppet_size:
+        puppet_y += 5
 
-    # Verificar colisión con el enemigo
-    if (
-        player_x < enemy_x + enemy_size
-        and player_x + player_size > enemy_x
-        and player_y < enemy_y + enemy_size
-        and player_y + player_size > enemy_y
-    ):
-        print("Game Over")
-        laugh_sound.play()
-        time.sleep(2)
-        game_over = True
-
-    # Dibujar en la pantalla
+    # Dibujar en pantalla
     screen.fill(black)
-    pygame.draw.rect(screen, white, [player_x, player_y, player_size, player_size])
-    pygame.draw.rect(screen, white, [enemy_x, enemy_y, enemy_size, enemy_size])
+    screen.blit(puppet_image, (puppet_x, puppet_y))
+    for niño in niños:
+        screen.blit(niño['image'], (niño['x'], niño['y']))
+
+    # Dibujar los bordes del cuadro alrededor de los niños
+    pygame.draw.rect(screen, white, (niños[0]['x'] - 2, niños[0]['y'] - 2, screen_width - 96, screen_height - 146), 2)
 
     pygame.display.update()
 
     clock.tick(30)
 
-# Salir del juego
+pygame.mixer.music.stop()  # Detener la música al salir del bucle principal
 pygame.quit()
 sys.exit()
