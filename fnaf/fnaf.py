@@ -51,7 +51,7 @@ niño_images = [
 ]
 
 niños = []
-for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100), 
+for i, position in enumerate([(50, 50), (screen_width - niño_size - 50, 50), 
                               (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
     niños.append({
         'x': position[0],
@@ -61,7 +61,7 @@ for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
     })
 
 # Sonidos
-footstep_sound = pygame.mixer.Sound('sound/found_puppet.mp3')
+footstep_sound = pygame.mixer.Sound('sound/Phantom_Puppet_Sound.mp3')
 laugh_sound = pygame.mixer.Sound('sound/FNAF2_Jumpscare_Sound.mp3')
 
 # Música de fondo
@@ -89,14 +89,24 @@ while not game_over:
     if keys[pygame.K_DOWN] and puppet_y < screen_height - puppet_size:
         puppet_y += 5
 
+    # Verificar colisión con los niños
+    for niño in niños:
+        if (
+            puppet_x < niño['x'] + niño['size']
+            and puppet_x + puppet_size > niño['x']
+            and puppet_y < niño['y'] + niño['size']
+            and puppet_y + puppet_size > niño['y']
+        ):
+            print("Game Over")
+            laugh_sound.play()
+            time.sleep(2)
+            game_over = True
+
     # Dibujar en pantalla
     screen.fill(black)
     screen.blit(puppet_image, (puppet_x, puppet_y))
     for niño in niños:
         screen.blit(niño['image'], (niño['x'], niño['y']))
-
-    # Dibujar los bordes del cuadro alrededor de los niños
-    pygame.draw.rect(screen, white, (niños[0]['x'] - 2, niños[0]['y'] - 2, screen_width - 96, screen_height - 146), 2)
 
     pygame.display.update()
 
