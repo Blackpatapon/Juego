@@ -50,6 +50,9 @@ niño_images = [
     pygame.image.load('image/niños.png')   # Ajusta la ruta de la imagen del niño 4
 ]
 
+# Imagen específica junto a los niños
+bonus_image = pygame.image.load('image/regalo.png')  # Ajusta la ruta de la imagen específica
+
 niños = []
 for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100), 
                               (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
@@ -57,7 +60,8 @@ for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
         'x': position[0],
         'y': position[1],
         'size': niño_size,
-        'image': pygame.transform.scale(niño_images[i], (niño_size, niño_size))
+        'image': pygame.transform.scale(niño_images[i], (niño_size, niño_size)),
+        'bonus': pygame.transform.scale(bonus_image, (niño_size, niño_size))  # Imagen específica junto al niño
     })
 
 # Sonidos
@@ -73,6 +77,13 @@ cuadro_x = 50
 cuadro_y = 100
 cuadro_width = screen_width - cuadro_x * 2
 cuadro_height = screen_height - 150
+
+# Separación para el texto
+separacion_texto = 20
+
+# Fuente para el texto
+font_size = 55
+font = pygame.font.Font(None, font_size)
 
 # Loop principal del juego
 clock = pygame.time.Clock()
@@ -95,7 +106,7 @@ while not game_over:
     if keys[pygame.K_DOWN] and puppet_y < cuadro_y + cuadro_height - puppet_size:
         puppet_y += 5
 
-    # Verificar colisión con los niños
+    # Verificar colisión con los niños y mostrar imagen específica junto a ellos
     for niño in niños:
         if (
             puppet_x < niño['x'] + niño['size']
@@ -103,23 +114,33 @@ while not game_over:
             and puppet_y < niño['y'] + niño['size']
             and puppet_y + puppet_size > niño['y']
         ):
-            print("Game Over")
-            laugh_sound.play()
-            time.sleep(2)
-            game_over = True
+            niño['bonus_position'] = (niño['x'] + niño['size'], niño['y'])
+        else:
+            niño['bonus_position'] = None
 
     # Dibujar en pantalla
     screen.fill(black)
     screen.blit(puppet_image, (puppet_x, puppet_y))
     for niño in niños:
         screen.blit(niño['image'], (niño['x'], niño['y']))
+        if niño['bonus_position'] is not None:
+            screen.blit(niño['bonus'], niño['bonus_position'])
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
 
+    #Dibujar texto
+    text = font.render("0100 GIVE LIFE", True, white)
+    text_rect = text.get_rect(center=(screen_width // 2, cuadro_y - separacion_texto - text.get_height() // 2))
+    screen.blit(text, text_rect)
+
     pygame.display.update()
 
     clock.tick(30)
+
+    # Verificar si la música ha terminado y volver a reproducirla
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.play()
 
 pygame.mixer.music.stop()  # Detener la música al salir del bucle principal
 pygame.quit()
