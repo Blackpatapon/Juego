@@ -68,6 +68,10 @@ laugh_sound = pygame.mixer.Sound('sound/FNAF2_Jumpscare_Sound.mp3')
 pygame.mixer.music.load('sound/found_puppet.mp3')  # Ajusta la ruta del archivo de música
 pygame.mixer.music.play(-1)  # -1 significa reproducir en bucle
 
+# Tamaño del cuadro con bordes blancos
+cuadro_width = screen_width - 100
+cuadro_height = screen_height - 150
+
 # Loop principal del juego
 clock = pygame.time.Clock()
 game_over = False
@@ -107,6 +111,9 @@ while not game_over:
     screen.blit(puppet_image, (puppet_x, puppet_y))
     for niño in niños:
         screen.blit(niño['image'], (niño['x'], niño['y']))
+
+    # Dibujar el cuadro con bordes blancos
+    pygame.draw.rect(screen, white, (50, 100, cuadro_width, cuadro_height), 2)
 
     pygame.display.update()
 
