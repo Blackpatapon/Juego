@@ -51,7 +51,7 @@ niño_images = [
 ]
 
 niños = []
-for i, position in enumerate([(50, 50), (screen_width - niño_size - 50, 50), 
+for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100), 
                               (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
     niños.append({
         'x': position[0],
@@ -61,7 +61,7 @@ for i, position in enumerate([(50, 50), (screen_width - niño_size - 50, 50),
     })
 
 # Sonidos
-footstep_sound = pygame.mixer.Sound('sound/Phantom_Puppet_Sound.mp3')
+footstep_sound = pygame.mixer.Sound('sound/found_puppet.mp3')
 laugh_sound = pygame.mixer.Sound('sound/FNAF2_Jumpscare_Sound.mp3')
 
 # Música de fondo
