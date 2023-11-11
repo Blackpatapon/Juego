@@ -69,7 +69,9 @@ pygame.mixer.music.load('sound/found_puppet.mp3')  # Ajusta la ruta del archivo 
 pygame.mixer.music.play(-1)  # -1 significa reproducir en bucle
 
 # Tamaño del cuadro con bordes blancos
-cuadro_width = screen_width - 100
+cuadro_x = 50
+cuadro_y = 100
+cuadro_width = screen_width - cuadro_x * 2
 cuadro_height = screen_height - 150
 
 # Loop principal del juego
@@ -82,15 +84,15 @@ while not game_over:
             game_over = True
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and puppet_x > 0:
+    if keys[pygame.K_LEFT] and puppet_x > cuadro_x:
         puppet_x -= 5
         puppet_image = puppet_image_left
-    if keys[pygame.K_RIGHT] and puppet_x < screen_width - puppet_size:
+    if keys[pygame.K_RIGHT] and puppet_x < cuadro_x + cuadro_width - puppet_size:
         puppet_x += 5
         puppet_image = puppet_image_right
-    if keys[pygame.K_UP] and puppet_y > 0:
+    if keys[pygame.K_UP] and puppet_y > cuadro_y:
         puppet_y -= 5
-    if keys[pygame.K_DOWN] and puppet_y < screen_height - puppet_size:
+    if keys[pygame.K_DOWN] and puppet_y < cuadro_y + cuadro_height - puppet_size:
         puppet_y += 5
 
     # Verificar colisión con los niños
@@ -113,7 +115,7 @@ while not game_over:
         screen.blit(niño['image'], (niño['x'], niño['y']))
 
     # Dibujar el cuadro con bordes blancos
-    pygame.draw.rect(screen, white, (50, 100, cuadro_width, cuadro_height), 2)
+    pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
 
     pygame.display.update()
 
