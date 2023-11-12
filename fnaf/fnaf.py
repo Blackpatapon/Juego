@@ -60,7 +60,7 @@ new_images = [
     pygame.image.load('image/foxy_head.png')
 ]
 
-new_images = [pygame.transform.scale(img, (niño_size, niño_size)) for img in new_images]
+new_images = [pygame.transform.scale(img, (int(niño_size * 1.5), int(niño_size * 1))) for img in new_images]
 new_images_positions = [None] * 4
 
 niños = []
