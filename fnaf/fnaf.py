@@ -86,6 +86,10 @@ separacion_texto = 20
 font_size = 55
 font = pygame.font.Font(None, font_size)
 
+# Tiempo de espera después de que todas las imágenes específicas aparezcan
+tiempo_espera = 2  # segundos
+tiempo_inicial = None
+
 # Loop principal del juego
 clock = pygame.time.Clock()
 game_over = False
@@ -120,6 +124,18 @@ while not game_over:
         elif niño['bonus_position'] is not None:
             # La imagen específica permanece si ya ha aparecido
             pass
+
+    # Verificar si todas las imágenes específicas han aparecido
+    todas_aparecidas = all(niño['bonus_position'] is not None for niño in niños)
+
+    # Si todas han aparecido, esperar 2 segundos y quitar las imágenes
+    if todas_aparecidas and tiempo_inicial is None:
+        tiempo_inicial = time.time()
+
+    if tiempo_inicial is not None and time.time() - tiempo_inicial > tiempo_espera:
+        for niño in niños:
+            niño['bonus_position'] = None
+        tiempo_inicial = None
 
     # Dibujar en pantalla
     screen.fill(black)
