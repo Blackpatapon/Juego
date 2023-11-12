@@ -60,6 +60,15 @@ new_images = [
     pygame.image.load('image/foxy_head.png')
 ]
 
+# Nueva imagen a aparecer
+golden_freddy_image = pygame.image.load('image/golden_freddy.png')
+golden_freddy_original_size = 10  # Tamaño inicial
+golden_freddy_size = golden_freddy_original_size
+golden_freddy_position = [screen_width // 2 - golden_freddy_size // 2, screen_height // 2 - golden_freddy_size // 2]
+
+# Velocidad de crecimiento de la imagen
+growth_speed = 1
+
 new_images = [pygame.transform.scale(img, (int(niño_size * 1.5), int(niño_size * 1))) for img in new_images]
 new_images_positions = [None] * 4
 
@@ -98,10 +107,12 @@ font = pygame.font.Font(None, font_size)
 
 # Tiempo de espera después de que todas las imágenes específicas aparezcan
 tiempo_espera = 2  # segundos
+tiempo_espera_gf = 5  # segundos para la animación de Golden Freddy
 tiempo_inicial = None
 
 tiempo_inicial_bonus = None
 tiempo_inicial_new_images = None
+tiempo_inicial_gf = None  # Agregada esta línea
 
 # Loop principal del juego
 clock = pygame.time.Clock()
@@ -151,17 +162,38 @@ while not game_over:
             niño['bonus_position'] = None
         tiempo_inicial_bonus = None
 
-        # Si es la segunda vez que bonus_image desaparece, mostrar nuevas imágenes
+        # Si es la segunda vez que bonus_image desaparece y aún no se han mostrado las nuevas imágenes, iniciar el temporizador
         if tiempo_inicial_new_images is None:
             tiempo_inicial_new_images = time.time()
 
-    # Si han pasado 2 segundos desde que bonus_image desapareció por segunda vez, mostrar nuevas imágenes
+    # Si han pasado 2 segundos desde que bonus_image desapareció por segunda vez y aún no se han mostrado las nuevas imágenes, mostrarlas
     if tiempo_inicial_new_images is not None and time.time() - tiempo_inicial_new_images > tiempo_espera:
         for i, niño in enumerate(niños):
             new_images_positions[i] = niño['bonus_position']
 
-    # Dibujar en pantalla
+        # Iniciar la animación de la nueva imagen (Golden Freddy) cuando todas las nuevas imágenes hayan aparecido
+        if all(position is not None for position in new_images_positions) and tiempo_inicial_gf is None:
+            tiempo_inicial_gf = time.time()
+
+    # Crear la animación de la nueva imagen (Golden Freddy)
+    if tiempo_inicial_gf is not None:
+        # Calcular el tiempo transcurrido desde el inicio de la animación
+        tiempo_transcurrido_gf = time.time() - tiempo_inicial_gf
+
+        if tiempo_transcurrido_gf <= tiempo_espera_gf:
+            # Aumentar gradualmente el tamaño de la imagen
+            golden_freddy_size += growth_speed
+
+            # Actualizar la posición para centrar la imagen en la pantalla
+            golden_freddy_position = [screen_width // 2 - golden_freddy_size // 2, screen_height // 2 - golden_freddy_size // 2]
+
+            # Dibujar la nueva imagen
+            screen.blit(pygame.transform.scale(golden_freddy_image, (golden_freddy_size, golden_freddy_size)), golden_freddy_position)
+
+    # Dibujar en pantalla (primero llenar de negro)
     screen.fill(black)
+
+    # Dibujar el resto de los elementos
     screen.blit(puppet_image, (puppet_x, puppet_y))
 
     for i, niño in enumerate(niños):
@@ -173,6 +205,10 @@ while not game_over:
         # Dibujar nuevas imágenes
         if new_images_positions[i] is not None:
             screen.blit(new_images[i], new_images_positions[i])
+
+    # Dibujar la nueva imagen (Golden Freddy)
+    if tiempo_inicial_gf is not None and tiempo_transcurrido_gf <= tiempo_espera_gf:
+        screen.blit(pygame.transform.scale(golden_freddy_image, (golden_freddy_size, golden_freddy_size)), golden_freddy_position)
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
