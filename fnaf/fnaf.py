@@ -53,6 +53,16 @@ niño_images = [
 # Imagen específica junto a los niños
 bonus_image = pygame.image.load('image/regalo.png')  # Ajusta la ruta de la imagen específica
 
+new_images = [
+    pygame.image.load('image/freddy_head.png'),
+    pygame.image.load('image/bonie_head.png'),
+    pygame.image.load('image/chica_head.png'),
+    pygame.image.load('image/foxy_head.png')
+]
+
+new_images = [pygame.transform.scale(img, (niño_size, niño_size)) for img in new_images]
+new_images_positions = [None] * 4
+
 niños = []
 for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
                               (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
@@ -90,10 +100,14 @@ font = pygame.font.Font(None, font_size)
 tiempo_espera = 2  # segundos
 tiempo_inicial = None
 
+tiempo_inicial_bonus = None
+tiempo_inicial_new_images = None
+
 # Loop principal del juego
 clock = pygame.time.Clock()
 game_over = False
 
+# Loop principal del juego
 while not game_over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -126,24 +140,39 @@ while not game_over:
             pass
 
     # Verificar si todas las imágenes específicas han aparecido
-    todas_aparecidas = all(niño['bonus_position'] is not None for niño in niños)
+    todas_aparecidas_bonus = all(niño['bonus_position'] is not None for niño in niños)
 
-    # Si todas han aparecido, esperar 2 segundos y quitar las imágenes
-    if todas_aparecidas and tiempo_inicial is None:
-        tiempo_inicial = time.time()
+    # Si todas han aparecido, esperar 2 segundos y quitar las bonus_images
+    if todas_aparecidas_bonus and tiempo_inicial_bonus is None:
+        tiempo_inicial_bonus = time.time()
 
-    if tiempo_inicial is not None and time.time() - tiempo_inicial > tiempo_espera:
+    if tiempo_inicial_bonus is not None and time.time() - tiempo_inicial_bonus > tiempo_espera:
         for niño in niños:
             niño['bonus_position'] = None
-        tiempo_inicial = None
+        tiempo_inicial_bonus = None
+
+        # Si es la segunda vez que bonus_image desaparece, mostrar nuevas imágenes
+        if tiempo_inicial_new_images is None:
+            tiempo_inicial_new_images = time.time()
+
+    # Si han pasado 2 segundos desde que bonus_image desapareció por segunda vez, mostrar nuevas imágenes
+    if tiempo_inicial_new_images is not None and time.time() - tiempo_inicial_new_images > tiempo_espera:
+        for i, niño in enumerate(niños):
+            new_images_positions[i] = niño['bonus_position']
 
     # Dibujar en pantalla
     screen.fill(black)
     screen.blit(puppet_image, (puppet_x, puppet_y))
-    for niño in niños:
+
+    for i, niño in enumerate(niños):
         screen.blit(niño['image'], (niño['x'], niño['y']))
         if niño['bonus_position'] is not None and cuadro_x < niño['bonus_position'][0] < cuadro_x + cuadro_width:
-            screen.blit(niño['bonus'], niño['bonus_position'])
+            if new_images_positions[i] is None:
+                screen.blit(niño['bonus'], niño['bonus_position'])
+
+        # Dibujar nuevas imágenes
+        if new_images_positions[i] is not None:
+            screen.blit(new_images[i], new_images_positions[i])
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
