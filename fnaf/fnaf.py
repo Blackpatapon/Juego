@@ -34,10 +34,10 @@ interference_sound.stop()
 # Puppet
 puppet_size = 100
 puppet_image_left = pygame.image.load('image/puppet_left.png')
-puppet_image_right = pygame.image.load('image/puppet_right.png') 
+puppet_image_right = pygame.image.load('image/puppet_right.png')
 puppet_image_left = pygame.transform.scale(puppet_image_left, (puppet_size, puppet_size))
 puppet_image_right = pygame.transform.scale(puppet_image_right, (puppet_size, puppet_size))
-puppet_image = puppet_image_left 
+puppet_image = puppet_image_left
 puppet_x = screen_width // 2 - puppet_size // 2
 puppet_y = screen_height // 2 - puppet_size // 2
 
@@ -54,14 +54,15 @@ niño_images = [
 bonus_image = pygame.image.load('image/regalo.png')  # Ajusta la ruta de la imagen específica
 
 niños = []
-for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100), 
+for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
                               (50, screen_height - niño_size - 50), (screen_width - niño_size - 50, screen_height - niño_size - 50)]):
     niños.append({
         'x': position[0],
         'y': position[1],
         'size': niño_size,
         'image': pygame.transform.scale(niño_images[i], (niño_size, niño_size)),
-        'bonus': pygame.transform.scale(bonus_image, (niño_size, niño_size))  # Imagen específica junto al niño
+        'bonus': pygame.transform.scale(bonus_image, (niño_size, niño_size)),  # Imagen específica junto al niño
+        'bonus_position': None  # Posición inicial sin imagen
     })
 
 # Sonidos
@@ -106,7 +107,7 @@ while not game_over:
     if keys[pygame.K_DOWN] and puppet_y < cuadro_y + cuadro_height - puppet_size:
         puppet_y += 5
 
-    # Verificar colisión con los niños y mostrar imagen específica junto a ellos
+    # Verificar colisión con los niños y mostrar imagen específica junto a ellos dentro del cuadro
     for niño in niños:
         if (
             puppet_x < niño['x'] + niño['size']
@@ -114,22 +115,24 @@ while not game_over:
             and puppet_y < niño['y'] + niño['size']
             and puppet_y + puppet_size > niño['y']
         ):
-            niño['bonus_position'] = (niño['x'] + niño['size'], niño['y'])
-        else:
-            niño['bonus_position'] = None
+            if niño['bonus_position'] is None:
+                niño['bonus_position'] = (niño['x'] - niño['size'], niño['y']) if niño['x'] > screen_width / 2 else (niño['x'] + niño['size'], niño['y'])
+        elif niño['bonus_position'] is not None:
+            # La imagen específica permanece si ya ha aparecido
+            pass
 
     # Dibujar en pantalla
     screen.fill(black)
     screen.blit(puppet_image, (puppet_x, puppet_y))
     for niño in niños:
         screen.blit(niño['image'], (niño['x'], niño['y']))
-        if niño['bonus_position'] is not None:
+        if niño['bonus_position'] is not None and cuadro_x < niño['bonus_position'][0] < cuadro_x + cuadro_width:
             screen.blit(niño['bonus'], niño['bonus_position'])
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
 
-    #Dibujar texto
+    # Dibujar texto
     text = font.render("0100 GIVE LIFE", True, white)
     text_rect = text.get_rect(center=(screen_width // 2, cuadro_y - separacion_texto - text.get_height() // 2))
     screen.blit(text, text_rect)
