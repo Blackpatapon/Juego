@@ -106,11 +106,11 @@ font_size = 55
 font = pygame.font.Font(None, font_size)
 
 # Velocidad de crecimiento de la imagen
-growth_speed = 40  # Ajusta la velocidad de crecimiento
+growth_speed = 50  # Ajusta la velocidad de crecimiento
 
 # Tiempo de espera después de que todas las imágenes específicas aparezcan
-tiempo_espera = 2  # segundos
-tiempo_espera_gf = 5  # segundos para la animación de Golden Freddy (ajustado a 1 segundo)
+tiempo_espera = 1  # segundos
+tiempo_espera_gf = 1  # segundos para la animación de Golden Freddy (ajustado a 1 segundo)
 tiempo_inicial = None
 
 tiempo_inicial_bonus = None
@@ -236,6 +236,28 @@ while not game_over:
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
+
+    # Esperar 1 segundo después de que Golden Freddy aparezca
+    if tiempo_inicial_gf is not None and tiempo_transcurrido_gf > tiempo_espera_gf:
+        if tiempo_inicial is None:
+            tiempo_inicial = time.time()
+
+    # Repetir la interferencia después de 1 segundo de haber aparecido Golden Freddy
+    if tiempo_inicial is not None and time.time() - tiempo_inicial > 1:
+        # Reproducir sonido de interferencia
+        interference_sound.play()
+
+        # Mostrar estática de color rojo durante la interferencia
+        for _ in range(90):  # 90 frames (3 segundos a 30 fps)
+            screen.fill(red if random.randint(0, 1) == 0 else black)
+            pygame.display.update()
+
+        time.sleep(1)  # Esperar 3 segundos
+
+        # Detener sonido de interferencia
+        interference_sound.stop()
+
+        game_over = True
 
     # Dibujar texto
     text = font.render("0100 GIVE LIFE", True, white)
