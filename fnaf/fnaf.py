@@ -105,9 +105,12 @@ separacion_texto = 20
 font_size = 55
 font = pygame.font.Font(None, font_size)
 
+# Velocidad de crecimiento de la imagen
+growth_speed = 40  # Ajusta la velocidad de crecimiento
+
 # Tiempo de espera después de que todas las imágenes específicas aparezcan
 tiempo_espera = 2  # segundos
-tiempo_espera_gf = 5  # segundos para la animación de Golden Freddy
+tiempo_espera_gf = 5  # segundos para la animación de Golden Freddy (ajustado a 1 segundo)
 tiempo_inicial = None
 
 tiempo_inicial_bonus = None
@@ -117,6 +120,7 @@ tiempo_inicial_gf = None  # Agregada esta línea
 # Loop principal del juego
 clock = pygame.time.Clock()
 game_over = False
+play_laugh_sound = True  
 
 # Loop principal del juego
 while not game_over:
@@ -149,6 +153,26 @@ while not game_over:
         elif niño['bonus_position'] is not None:
             # La imagen específica permanece si ya ha aparecido
             pass
+    
+    # Crear la animación de la nueva imagen (Golden Freddy)
+    if tiempo_inicial_gf is not None:
+        # Calcular el tiempo transcurrido desde el inicio de la animación
+        tiempo_transcurrido_gf = time.time() - tiempo_inicial_gf
+
+        if tiempo_transcurrido_gf <= tiempo_espera_gf:
+            # Aumentar gradualmente el tamaño de la imagen de forma más rápida
+            golden_freddy_size += growth_speed
+
+            # Actualizar la posición para centrar la imagen en la pantalla
+            golden_freddy_position = [screen_width // 2 - golden_freddy_size // 2, screen_height // 2 - golden_freddy_size // 2]
+
+            # Dibujar la nueva imagen
+            screen.blit(pygame.transform.scale(golden_freddy_image, (golden_freddy_size, golden_freddy_size)), golden_freddy_position)
+
+            # Si es el momento adecuado y aún no se ha reproducido, reproducir el sonido de risa
+            if play_laugh_sound:
+                laugh_sound.play()
+                play_laugh_sound = False
 
     # Verificar si todas las imágenes específicas han aparecido
     todas_aparecidas_bonus = all(niño['bonus_position'] is not None for niño in niños)
@@ -181,7 +205,7 @@ while not game_over:
         tiempo_transcurrido_gf = time.time() - tiempo_inicial_gf
 
         if tiempo_transcurrido_gf <= tiempo_espera_gf:
-            # Aumentar gradualmente el tamaño de la imagen
+            # Aumentar gradualmente el tamaño de la imagen de forma más rápida
             golden_freddy_size += growth_speed
 
             # Actualizar la posición para centrar la imagen en la pantalla
