@@ -8,7 +8,7 @@ pygame.init()
 screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Puppet Mini Game')
+pygame.display.set_caption('Give Life')
 
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -50,14 +50,8 @@ niño_images = [
     pygame.image.load('image/niños.png')   # Ajusta la ruta de la imagen del niño 4
 ]
 
-# Imágenes específicas junto a los niños
+# Imagen específica junto a los niños
 bonus_image = pygame.image.load('image/regalo.png')  # Ajusta la ruta de la imagen específica
-new_images = [
-    pygame.image.load('image/freddy_head.png'),  # Ajusta la ruta de la nueva imagen 1
-    pygame.image.load('image/bonie_head.png'),  # Ajusta la ruta de la nueva imagen 2
-    pygame.image.load('image/chica_head.png'),  # Ajusta la ruta de la nueva imagen 3
-    pygame.image.load('image/foxy_head.png')   # Ajusta la ruta de la nueva imagen 4
-]
 
 niños = []
 for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
@@ -68,9 +62,7 @@ for i, position in enumerate([(50, 100), (screen_width - niño_size - 50, 100),
         'size': niño_size,
         'image': pygame.transform.scale(niño_images[i], (niño_size, niño_size)),
         'bonus': pygame.transform.scale(bonus_image, (niño_size, niño_size)),  # Imagen específica junto al niño
-        'new_image': pygame.transform.scale(new_images[i], (niño_size, niño_size)),  # Nueva imagen junto al niño
-        'bonus_position': None,  # Posición inicial sin imagen
-        'new_image_position': None  # Posición inicial sin nueva imagen
+        'bonus_position': None  # Posición inicial sin imagen
     })
 
 # Sonidos
@@ -94,11 +86,9 @@ separacion_texto = 20
 font_size = 55
 font = pygame.font.Font(None, font_size)
 
-# Tiempo de espera después de que todas las imágenes específicas hayan aparecido
-tiempo_espera_bonus = 2  # segundos
-tiempo_espera_new_images = 2  # segundos
-tiempo_inicial_bonus = None
-tiempo_inicial_new_images = None
+# Tiempo de espera después de que todas las imágenes específicas aparezcan
+tiempo_espera = 2  # segundos
+tiempo_inicial = None
 
 # Loop principal del juego
 clock = pygame.time.Clock()
@@ -129,23 +119,31 @@ while not game_over:
             and puppet_y < niño['y'] + niño['size']
             and puppet_y + puppet_size > niño['y']
         ):
-            if niño['bonus_position'] is not None:
-                niño['new_image_position'] = (niño['x'] - niño['size'], niño['y']) if niño['x'] > screen_width / 2 else (niño['x'] + niño['size'], niño['y'])
-            elif niño['new_image_position'] is None:
+            if niño['bonus_position'] is None:
                 niño['bonus_position'] = (niño['x'] - niño['size'], niño['y']) if niño['x'] > screen_width / 2 else (niño['x'] + niño['size'], niño['y'])
         elif niño['bonus_position'] is not None:
-            # Si Puppet ya no está cerca, la imagen específica permanece
-            niño['new_image_position'] = (niño['x'] - niño['size'], niño['y']) if niño['x'] > screen_width / 2 else (niño['x'] + niño['size'], niño['y'])
+            # La imagen específica permanece si ya ha aparecido
+            pass
+
+    # Verificar si todas las imágenes específicas han aparecido
+    todas_aparecidas = all(niño['bonus_position'] is not None for niño in niños)
+
+    # Si todas han aparecido, esperar 2 segundos y quitar las imágenes
+    if todas_aparecidas and tiempo_inicial is None:
+        tiempo_inicial = time.time()
+
+    if tiempo_inicial is not None and time.time() - tiempo_inicial > tiempo_espera:
+        for niño in niños:
+            niño['bonus_position'] = None
+        tiempo_inicial = None
 
     # Dibujar en pantalla
     screen.fill(black)
     screen.blit(puppet_image, (puppet_x, puppet_y))
     for niño in niños:
         screen.blit(niño['image'], (niño['x'], niño['y']))
-        if niño['bonus_position'] is not None:
+        if niño['bonus_position'] is not None and cuadro_x < niño['bonus_position'][0] < cuadro_x + cuadro_width:
             screen.blit(niño['bonus'], niño['bonus_position'])
-        if niño['new_image_position'] is not None:
-            screen.blit(niño['new_image'], niño['new_image_position'])
 
     # Dibujar el cuadro con bordes blancos
     pygame.draw.rect(screen, white, (cuadro_x, cuadro_y, cuadro_width, cuadro_height), 2)
@@ -162,26 +160,6 @@ while not game_over:
     # Verificar si la música ha terminado y volver a reproducirla
     if not pygame.mixer.music.get_busy():
         pygame.mixer.music.play()
-
-    # Verificar si todas las imágenes específicas han aparecido
-    if all(niño['bonus_position'] is not None for niño in niños) and tiempo_inicial_bonus is None:
-        tiempo_inicial_bonus = time.time()
-
-    # Verificar si ha pasado el tiempo de espera para las imágenes específicas y quitarlas
-    if tiempo_inicial_bonus is not None and time.time() - tiempo_inicial_bonus > tiempo_espera_bonus:
-        for niño in niños:
-            niño['bonus_position'] = None
-        tiempo_inicial_bonus = None
-
-    # Verificar si todas las nuevas imágenes han aparecido
-    if all(niño['new_image_position'] is not None for niño in niños) and tiempo_inicial_new_images is None:
-        tiempo_inicial_new_images = time.time()
-
-    # Verificar si ha pasado el tiempo de espera para las nuevas imágenes y quitarlas
-    if tiempo_inicial_new_images is not None and time.time() - tiempo_inicial_new_images > tiempo_espera_new_images:
-        for niño in niños:
-            niño['new_image_position'] = None
-        tiempo_inicial_new_images = None
 
 pygame.mixer.music.stop()  # Detener la música al salir del bucle principal
 pygame.quit()
