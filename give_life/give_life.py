@@ -10,6 +10,9 @@ screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Give Life')
+# Icono del menú
+icon = pygame.image.load("image/icono.png")
+pygame.display.set_icon(icon)
 
 #Colores
 black = (0, 0, 0)
@@ -43,7 +46,7 @@ puppet_image_left = pygame.image.load('image/puppet_left.png')
 puppet_image_right = pygame.image.load('image/puppet_right.png')
 puppet_image_left = pygame.transform.scale(puppet_image_left, (puppet_size, puppet_size))
 puppet_image_right = pygame.transform.scale(puppet_image_right, (puppet_size, puppet_size))
-puppet_image = puppet_image_left
+puppet_image = puppet_image_right
 puppet_x = screen_width // 2 - puppet_size // 2
 puppet_y = screen_height // 2 - puppet_size // 2
 
@@ -277,8 +280,55 @@ while not game_over:
     #Reproducir musica al terminar
     if not background_sound.get_busy():
         background_sound.play()
+    
+    # Pregunta para volver a jugar
+    if tiempo_inicial is not None and time.time() - tiempo_inicial > 1:
+        interference_sound.play()
 
-#Cerrar
+        for _ in range(90):
+            screen.fill(red if random.randint(0, 1) == 0 else black)
+            pygame.display.update()
+
+        time.sleep(1)
+
+        interference_sound.stop()
+
+        # Mostrar la pregunta
+        font_question = pygame.font.Font(None, font_size)
+        question_text = font_question.render("¿QUIERES VOLVER A JUGAR? (Y/N)", True, white)
+        question_rect = question_text.get_rect(center=(screen_width // 2, screen_height // 2))
+        screen.blit(question_text, question_rect)
+        pygame.display.update()
+
+        # Esperar la respuesta
+        waiting_for_response = True
+        while waiting_for_response:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        # Reiniciar el juego
+                        interference_sound.stop()
+                        game_over = False
+                        tiempo_inicial = None
+                        tiempo_inicial_gf = None
+                        tiempo_inicial_regalo = None
+                        tiempo_inicial_animatronicos = None
+                        give_life_number = 100
+                        golden_freddy_size = golden_freddy_original_size
+                        play_jumpsacare_sound = True  # Reiniciar la variable
+                        for niño in niños:
+                            niño['regalo_position'] = None
+                        for i in range(4):
+                            animatronicos_positions[i] = None
+                        background_sound.play(-1)
+                        waiting_for_response = False
+                    elif event.key == pygame.K_n:
+                        # Salir del juego
+                        interference_sound.stop()
+                        game_over = True
+                        waiting_for_response = False
+
+# Cerrar
 background_sound.stop()
 pygame.quit()
 sys.exit()
