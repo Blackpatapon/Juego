@@ -1,5 +1,6 @@
 import pygame
 import sys
+import serial
 
 # Inicializar pygame
 pygame.init()
@@ -25,6 +26,9 @@ player_speed = 100
 player_image = pygame.image.load("images/corazon.png")
 player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
+# Inicializar puerto serie
+ser = serial.Serial('/dev/ttyUSB0', 9600)  # Reemplaza 'COM3' con el puerto correcto
+
 # Bucle principal del juego
 while True:
     for event in pygame.event.get():
@@ -32,17 +36,17 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Obtener las teclas presionadas
-    keys = pygame.key.get_pressed()
+    # Leer datos del puerto serie
+    data = ser.read().decode('utf-8')
 
-    # Mover el jugador y cambiar la imagen
-    if keys[pygame.K_LEFT] and player_x > 0:
+    # Mover el jugador según los datos recibidos
+    if data == 'L' and player_x > 0:
         player_x -= player_speed
-    if keys[pygame.K_RIGHT] and player_x < width - player_size:
+    if data == 'R' and player_x < width - player_size:
         player_x += player_speed
-    if keys[pygame.K_UP] and player_y > 0:
+    if data == 'U' and player_y > 0:
         player_y -= player_speed
-    if keys[pygame.K_DOWN] and player_y < height - player_size:
+    if data == 'D' and player_y < height - player_size:
         player_y += player_speed
 
     # Asegurarse de que el jugador no se salga de los límites de la pantalla
