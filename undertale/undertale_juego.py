@@ -37,7 +37,7 @@ while True:
             sys.exit()
 
     # Leer datos del puerto serie
-    data = ser.read().decode('utf-8')
+    data = ser.read().decode('latin-1')  # Cambia a 'latin-1' para admitir todos los bytes
 
     # Mover el jugador según los datos recibidos
     if data == 'L' and player_x > 0:
